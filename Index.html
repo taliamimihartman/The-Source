@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Source — Your city's digital farmers market.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF7EF;
+    --white:#FFFFFF;
+    --pale-sage:#E6EBDC;
+    --soft-sage:#BFCCAC;
+    --forest:#3B4A30;
+    --forest-dark:#2C3823;
+    --ink:#2B2A22;
+    --ink-soft:#5B5A4E;
+    --line:#DCD8C9;
+    --card-bg:#FFFFFF;
+    --tag-bg:#EFE9D8;
+    --shadow: 0 1px 2px rgba(43,42,34,0.04), 0 8px 24px rgba(43,42,34,0.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --cream:#1C2118; --white:#242A1F; --pale-sage:#2A3222; --soft-sage:#4C5B3D;
+      --forest:#A9C79A; --forest-dark:#C4DDB6; --ink:#EDEAE0; --ink-soft:#B7B39F;
+      --line:#3A4030; --card-bg:#242A1F; --tag-bg:#2E3524;
+      --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.25);
+    }
+  }
+  :root[data-theme="dark"]{
+    --cream:#1C2118; --white:#242A1F; --pale-sage:#2A3222; --soft-sage:#4C5B3D;
+    --forest:#A9C79A; --forest-dark:#C4DDB6; --ink:#EDEAE0; --ink-soft:#B7B39F;
+    --line:#3A4030; --card-bg:#242A1F; --tag-bg:#2E3524;
+    --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.25);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--cream);color:var(--ink);
+    font-family:'Inter', -apple-system, sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  img,svg{max-width:100%;display:block;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  h1,h2,h3{font-family:'Fraunces', serif;font-weight:500;margin:0;letter-spacing:-0.01em;color:var(--ink);}
+  p{margin:0;line-height:1.6;color:var(--ink-soft);}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px;}
+  section{padding:96px 0;}
+  @media (max-width:720px){ section{padding:56px 0;} .wrap{padding:0 20px;} }
+  :focus-visible{outline:2px solid var(--forest);outline-offset:3px;}
+
+  /* ---------- Page switching ---------- */
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* ---------- Buttons ---------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:999px;font-weight:600;font-size:15px;border:1.5px solid transparent;white-space:nowrap;transition:transform .15s ease, background .2s ease;}
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{background:var(--forest);color:var(--cream);}
+  .btn-primary:hover{background:var(--forest-dark);}
+  .btn-secondary{background:transparent;border-color:var(--forest);color:var(--forest);}
+  .btn-secondary:hover{background:var(--pale-sage);}
+
+  /* ---------- Header ---------- */
+  header{position:sticky;top:0;z-index:50;background:rgba(250,247,239,0.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  @media (prefers-color-scheme:dark){header{background:rgba(28,33,24,0.92);}}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;height:76px;}
+  .logo{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:var(--forest);flex-shrink:0;background:none;border:none;padding:0;}
+  .logo-mark{width:28px;height:28px;flex-shrink:0;}
+  .menu-toggle{position:relative;display:flex;align-items:center;gap:10px;background:none;border:none;color:var(--forest);padding:8px 0 8px 8px;}
+  .menu-toggle .label{font-size:14px;font-weight:600;}
+  .menu-toggle .cart-badge{position:absolute;top:2px;left:20px;background:var(--forest);color:var(--cream);font-size:9px;font-weight:700;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+  @media (max-width:560px){.menu-toggle .label{display:none;}}
+
+  /* ---------- Menu overlay (all breakpoints) ---------- */
+  .menu-overlay{
+    position:fixed;inset:0;background:var(--cream);z-index:100;
+    transform:translateX(100%);transition:transform .28s ease;
+    display:flex;flex-direction:column;overflow-y:auto;
+  }
+  .menu-overlay.open{transform:translateX(0);}
+  .menu-inner{max-width:520px;width:100%;margin:0 auto;padding:24px 24px 48px;flex:1;display:flex;flex-direction:column;}
+  .menu-top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px;}
+  .menu-search{display:flex;align-items:center;gap:12px;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:36px;}
+  .menu-search input{flex:1;border:none;outline:none;background:none;font-family:inherit;font-size:15px;color:var(--ink);}
+  .menu-search svg{flex-shrink:0;color:var(--ink-soft);}
+  .menu-section{display:flex;flex-direction:column;}
+  .menu-section + .menu-section{margin-top:8px;padding-top:20px;border-top:1px solid var(--line);}
+  .menu-label{font-size:11.5px;font-weight:700;letter-spacing:0.04em;color:var(--ink-soft);margin-bottom:6px;}
+  .menu-item{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    background:none;border:none;text-align:left;padding:16px 4px;
+    font-family:'Fraunces',serif;font-size:22px;color:var(--ink);border-bottom:1px solid var(--line);
+  }
+  .menu-item:last-child{border-bottom:none;}
+  .menu-item .mi-count{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;background:var(--pale-sage);color:var(--forest-dark);padding:3px 10px;border-radius:999px;}
+  .menu-item svg{color:var(--soft-sage);width:18px;height:18px;flex-shrink:0;}
+  .menu-cta{margin-top:auto;padding-top:28px;}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:64px 0 40px;}
+  .hero-grid{display:grid;grid-template-columns:1fr 0.92fr;gap:56px;align-items:center;}
+  @media (max-width:920px){.hero-grid{grid-template-columns:1fr;gap:36px;}}
+  .eyebrow-tag{display:inline-flex;align-items:center;gap:8px;background:var(--pale-sage);color:var(--forest-dark);padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:22px;}
+  .eyebrow-tag span.dot{width:6px;height:6px;border-radius:50%;background:var(--forest);}
+  .hero h1{font-size:clamp(38px,5.2vw,60px);line-height:1.06;max-width:11.5ch;}
+  .hero-sub{font-size:18px;max-width:44ch;margin-top:22px;}
+  .hero-actions{display:flex;gap:14px;margin-top:16px;flex-wrap:wrap;}
+  .hero-location{
+    display:flex;align-items:center;gap:10px;background:var(--white);border:1px solid var(--line);
+    border-radius:999px;padding:8px 8px 8px 20px;margin-top:30px;max-width:520px;box-shadow:var(--shadow);
+  }
+  .hero-location input{flex:1;border:none;outline:none;background:none;font-family:inherit;font-size:14.5px;color:var(--ink);min-width:0;}
+  .hero-location .btn{padding:12px 22px;flex-shrink:0;}
+  @media (max-width:520px){
+    .hero-location{flex-wrap:wrap;border-radius:20px;padding:14px 16px;}
+    .hero-location .btn{width:100%;}
+  }
+  .hero-art{position:relative;}
+  .hero-art svg{width:100%;height:auto;}
+  .floating-card{position:absolute;background:var(--card-bg);border-radius:16px;box-shadow:var(--shadow);padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;}
+  .fc1{top:8%;left:-6%;} .fc2{bottom:10%;right:-4%;}
+  @media (max-width:920px){.floating-card{display:none;}}
+
+  /* ---------- Value prop bar (legacy, kept for compatibility) ---------- */
+  .value-bar{padding:52px 0;border-top:1px solid var(--line);}
+  .value-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;}
+  @media (max-width:800px){.value-grid{grid-template-columns:repeat(2,1fr);}}
+  .value-item{display:flex;flex-direction:column;align-items:flex-start;gap:12px;}
+  .value-item .icon-wrap{width:42px;height:42px;color:var(--forest);}
+  .value-item p{font-weight:600;color:var(--ink);font-size:15px;}
+
+  /* ---------- Four pillars (home) ---------- */
+  .pillars{padding:80px 0 96px;border-top:1px solid var(--line);}
+  .pillars-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;}
+  @media (max-width:1000px){.pillars-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.pillars-grid{grid-template-columns:1fr;}}
+  .pillar-item{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:26px 22px;}
+  .pillar-item .icon-wrap{width:36px;height:36px;color:var(--forest);margin-bottom:18px;}
+  .pillar-item h3{font-size:17px;margin-bottom:10px;}
+  .pillar-item p{font-size:14px;}
+
+  /* ---------- Page header (for non-home pages) ---------- */
+  .page-hero{padding:56px 0 8px;}
+  .page-hero .eyebrow-tag{margin-bottom:16px;}
+  .page-hero h1{font-size:clamp(30px,4vw,44px);}
+  .page-hero p{margin-top:12px;font-size:16px;max-width:56ch;}
+
+  /* ---------- Section headers ---------- */
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:44px;}
+  .section-head h2{font-size:clamp(24px,2.8vw,32px);}
+  .section-head .see-all{font-weight:600;font-size:14.5px;color:var(--forest);white-space:nowrap;display:flex;align-items:center;gap:6px;background:none;border:none;}
+  @media (max-width:600px){.section-head{flex-direction:column;align-items:flex-start;gap:14px;}}
+
+  /* ---------- Categories ---------- */
+  .cat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:20px;}
+  @media (max-width:900px){.cat-grid{grid-template-columns:repeat(3,1fr);}}
+  @media (max-width:620px){.cat-grid{grid-template-columns:repeat(2,1fr);gap:14px;}}
+  .cat-card{text-align:center;background:none;border:none;padding:0;width:100%;}
+  .cat-art{aspect-ratio:1;border-radius:50%;background:var(--pale-sage);display:flex;align-items:center;justify-content:center;padding:22%;margin-bottom:14px;transition:background .2s ease;}
+  .cat-card:hover .cat-art{background:var(--soft-sage);}
+  .cat-art svg{width:100%;height:100%;}
+  .cat-card span{font-weight:600;font-size:14.5px;}
+
+  /* ---------- Products ---------- */
+  .prod-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;}
+  @media (max-width:1100px){.prod-grid{grid-template-columns:repeat(3,1fr);}}
+  @media (max-width:680px){.prod-grid{grid-template-columns:repeat(2,1fr);gap:14px;}}
+  .prod-card{background:var(--card-bg);border-radius:18px;overflow:hidden;border:1px solid var(--line);transition:box-shadow .2s ease, transform .2s ease;display:flex;flex-direction:column;}
+  .prod-card:hover{box-shadow:var(--shadow);transform:translateY(-2px);}
+  .prod-img{aspect-ratio:1;background:var(--pale-sage);position:relative;display:flex;align-items:center;justify-content:center;padding:18%;}
+  .prod-badge{position:absolute;top:10px;left:10px;background:var(--white);color:var(--forest-dark);font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;letter-spacing:0.02em;}
+  .prod-fav{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:var(--white);display:flex;align-items:center;justify-content:center;color:var(--forest);border:none;}
+  .prod-body{padding:16px;display:flex;flex-direction:column;gap:5px;flex:1;}
+  .prod-brand{font-size:12px;font-weight:600;color:var(--ink-soft);}
+  .prod-name{font-weight:600;font-size:15px;color:var(--ink);}
+  .prod-attr{font-size:12.5px;color:var(--forest);font-weight:600;}
+  .prod-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
+  .prod-price{font-family:'Fraunces',serif;font-size:17px;font-weight:600;}
+  .prod-rating{display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--ink-soft);}
+  .prod-rating svg{width:13px;height:13px;color:var(--forest);}
+  .add-cart-btn{margin-top:12px;width:100%;padding:10px;border-radius:10px;background:var(--pale-sage);color:var(--forest-dark);border:none;font-weight:600;font-size:13.5px;transition:background .15s ease;}
+  .add-cart-btn:hover{background:var(--soft-sage);}
+
+  /* ---------- Standards ---------- */
+  .standards{background:var(--pale-sage);}
+  .standards-top{max-width:640px;margin-bottom:52px;}
+  .standards-top h2{font-size:clamp(28px,3.4vw,40px);margin-bottom:16px;}
+  .standards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px 28px;}
+  @media (max-width:760px){.standards-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:460px){.standards-grid{grid-template-columns:1fr;}}
+  .standard-item .icon-wrap{width:38px;height:38px;color:var(--forest);margin-bottom:16px;}
+  .standard-item h3{font-size:16.5px;margin-bottom:8px;}
+  .standard-item p{font-size:14px;}
+
+  /* ---------- Makers ---------- */
+  .maker-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  @media (max-width:820px){.maker-grid{grid-template-columns:1fr;}}
+  .maker-card{border-radius:18px;overflow:hidden;background:var(--card-bg);border:1px solid var(--line);}
+  .maker-img{aspect-ratio:16/11;background:var(--tag-bg);display:flex;align-items:center;justify-content:center;padding:16%;}
+  .maker-body{padding:22px;}
+  .maker-body h3{font-size:19px;margin-bottom:4px;}
+  .maker-loc{font-size:12.5px;color:var(--forest);font-weight:600;margin-bottom:10px;display:block;}
+  .maker-body p.desc{font-size:14px;}
+  .fulfillment-pill{display:inline-block;margin-top:12px;background:var(--pale-sage);color:var(--forest-dark);font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:999px;}
+
+  /* ---------- Markets & pop-up events ---------- */
+  .event-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  @media (max-width:820px){.event-grid{grid-template-columns:1fr;}}
+  .event-card{background:var(--card-bg);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:6px;}
+  .event-card .event-date{font-size:11.5px;font-weight:700;color:var(--forest);letter-spacing:0.03em;margin-bottom:4px;}
+  .event-card h3{font-size:17px;}
+  .event-card .desc{font-size:13.5px;margin-top:4px;}
+  .event-card-cta{background:var(--pale-sage);border:none;justify-content:center;}
+
+  /* ---------- Local discovery ---------- */
+  .local-banner{background:var(--forest);color:var(--cream);border-radius:28px;padding:56px 44px;margin-bottom:64px;}
+  @media (max-width:720px){.local-banner{padding:40px 26px;border-radius:20px;}}
+  .local-banner h2{color:var(--cream);font-size:clamp(24px,3vw,34px);max-width:16ch;}
+  .local-banner p.sub{color:rgba(250,247,239,0.75);max-width:46ch;margin-top:14px;font-size:15.5px;}
+  .local-search{margin-top:32px;display:flex;gap:10px;max-width:480px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.22);border-radius:999px;padding:6px 6px 6px 20px;align-items:center;}
+  .local-search input{flex:1;background:none;border:none;outline:none;color:var(--cream);font-size:14.5px;font-family:inherit;}
+  .local-search input::placeholder{color:rgba(250,247,239,0.55);}
+  .local-search button{background:var(--cream);color:var(--forest-dark);border:none;border-radius:999px;padding:11px 20px;font-weight:600;font-size:13.5px;flex-shrink:0;}
+  .local-chip-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:40px;}
+  .local-chip{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:13.5px;font-weight:600;}
+  .local-chip .dot-icon{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .local-chip .dot-icon svg{width:16px;height:16px;}
+
+  /* ---------- For sellers ---------- */
+  .sellers{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;}
+  @media (max-width:880px){.sellers{grid-template-columns:1fr;gap:36px;}}
+  .sellers h2{font-size:clamp(26px,3.2vw,38px);max-width:14ch;}
+  .sellers p.sub{margin-top:16px;font-size:15.5px;max-width:46ch;}
+  .benefit-list{margin-top:28px;display:flex;flex-direction:column;gap:16px;}
+  .benefit-row{display:flex;align-items:center;gap:14px;font-weight:600;font-size:15px;}
+  .benefit-row .icon-wrap{width:22px;height:22px;color:var(--forest);flex-shrink:0;}
+  .sellers-art{background:var(--pale-sage);border-radius:22px;padding:12%;}
+
+  /* ---------- About ---------- */
+  .about-inner{max-width:740px;}
+  .about-inner p.lead{font-size:20px;color:var(--ink);font-family:'Fraunces',serif;font-weight:400;line-height:1.5;}
+  .about-inner .mission{margin-top:32px;padding-top:28px;border-top:1px solid var(--line);}
+  .about-inner .mission-label{font-size:12.5px;font-weight:700;color:var(--forest);margin-bottom:8px;display:block;}
+  .about-inner .mission p{font-size:16px;color:var(--ink);}
+
+  /* ---------- Simple utility pages (search / account / favorites / cart) ---------- */
+  .simple-page{padding:72px 0 100px;min-height:60vh;}
+  .simple-page .wrap{max-width:640px;}
+  .simple-page h1{font-size:clamp(28px,3.6vw,38px);margin-bottom:14px;}
+  .search-field{display:flex;align-items:center;gap:12px;background:var(--white);border:1px solid var(--line);border-radius:999px;padding:14px 20px;margin:28px 0;}
+  .search-field input{flex:1;border:none;outline:none;background:none;font-family:inherit;font-size:15px;color:var(--ink);}
+  .search-suggest{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
+  .search-chip{background:var(--pale-sage);color:var(--forest-dark);font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;border:none;}
+  .empty-state{text-align:center;padding:60px 20px;background:var(--white);border:1px dashed var(--line);border-radius:20px;margin-top:8px;}
+  .empty-state .icon-wrap{width:44px;height:44px;color:var(--soft-sage);margin:0 auto 18px;}
+  .empty-state h3{font-size:19px;margin-bottom:8px;}
+  .empty-state p{font-size:14.5px;margin-bottom:22px;}
+  .acct-card{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:32px;margin-top:24px;}
+  .acct-field{margin-bottom:16px;}
+  .acct-field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink);}
+  .acct-field input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);font-family:inherit;font-size:14.5px;background:var(--cream);outline:none;}
+  .acct-field input:focus{border-color:var(--forest);}
+  .cart-row{display:flex;gap:16px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line);}
+  .cart-row .prod-img{width:76px;height:76px;flex-shrink:0;border-radius:12px;padding:14px;}
+  .cart-row .ci-body{flex:1;}
+  .cart-row .ci-body h4{font-family:'Fraunces',serif;font-weight:500;font-size:16px;margin-bottom:3px;}
+  .cart-row .ci-body span{font-size:13px;color:var(--ink-soft);}
+  .cart-row .ci-price{font-family:'Fraunces',serif;font-weight:600;font-size:16px;}
+  .cart-summary{margin-top:24px;padding-top:20px;border-top:1px solid var(--line);}
+  .cart-summary .row{display:flex;justify-content:space-between;margin-bottom:10px;font-size:14.5px;}
+  .cart-summary .row.total{font-weight:700;font-size:17px;color:var(--ink);margin-top:14px;}
+
+  /* ---------- Footer ---------- */
+  footer{padding:64px 0 32px;border-top:1px solid var(--line);}
+  .footer-top{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:32px;margin-bottom:56px;}
+  @media (max-width:900px){.footer-top{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.footer-top{grid-template-columns:1fr;}}
+  .footer-brand .logo{margin-bottom:14px;}
+  .footer-brand p{font-size:14px;max-width:30ch;margin-bottom:22px;}
+  .footer-signup{display:flex;gap:8px;max-width:320px;}
+  .footer-signup input{flex:1;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--white);font-family:inherit;font-size:13.5px;color:var(--ink);outline:none;}
+  .footer-signup input:focus{border-color:var(--forest);}
+  .footer-signup button{background:var(--forest);color:var(--cream);border:none;border-radius:10px;padding:11px 16px;font-weight:600;font-size:13px;flex-shrink:0;}
+  .footer-col h4{font-size:13px;font-weight:700;margin-bottom:16px;color:var(--ink);}
+  .footer-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px;}
+  .footer-col button, .footer-col a{font-size:14px;color:var(--ink-soft);background:none;border:none;padding:0;text-align:left;font-family:inherit;}
+  .footer-col button:hover, .footer-col a:hover{color:var(--forest);}
+  .footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding-top:28px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-soft);}
+  .footer-social{display:flex;gap:16px;}
+  .footer-social a{color:var(--ink-soft);}
+  .footer-social a:hover{color:var(--forest);}
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER (persistent, hamburger is the only way to navigate) ============ -->
+<header>
+  <div class="wrap nav-row">
+    <button class="logo" onclick="showPage('home')">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M16 24c4.5-3.2 6-7 6-10.5C22 9 19.5 6.5 16 5c-3.5 1.5-6 4-6 8.5 0 3.5 1.5 7.3 6 10.5Z" fill="currentColor" opacity="0.9"/>
+        <path d="M16 24v-9" stroke="var(--cream)" stroke-width="1.2"/>
+      </svg>
+      The Source
+    </button>
+    <button class="menu-toggle" onclick="openMenu()" aria-label="Open menu">
+      <span class="label">Menu</span>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span class="cart-badge" id="headerCartBadge">2</span>
+    </button>
+  </div>
+</header>
+
+<!-- ============ MENU OVERLAY ============ -->
+<div class="menu-overlay" id="menu">
+  <div class="menu-inner">
+    <div class="menu-top-row">
+      <button class="logo" onclick="showPage('home')" style="font-size:19px;">
+        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" style="width:24px;height:24px;">
+          <circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M16 24c4.5-3.2 6-7 6-10.5C22 9 19.5 6.5 16 5c-3.5 1.5-6 4-6 8.5 0 3.5 1.5 7.3 6 10.5Z" fill="currentColor" opacity="0.9"/>
+        </svg>
+        The Source
+      </button>
+      <button class="icon-btn" onclick="closeMenu()" aria-label="Close menu" style="background:none;border:none;color:var(--forest);">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="menu-search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Search products, brands, makers..." onfocus="showPage('search')" readonly>
+    </div>
+
+    <div class="menu-section">
+      <span class="menu-label">BROWSE</span>
+      <button class="menu-item" onclick="showPage('local')">Local
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="menu-item" onclick="showPage('shop')">Shop
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="menu-item" onclick="showPage('shop','trending-block')">New &amp; Trending
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="menu-item" onclick="showPage('standards')">Our Standards
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="menu-item" onclick="showPage('about')">About
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="menu-section">
+      <span class="menu-label">YOU</span>
+      <button class="menu-item" onclick="showPage('account')">Account
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="menu-item" onclick="showPage('favorites')">Favorites
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="menu-item" onclick="showPage('cart')">Cart
+        <span class="mi-count">2</span>
+      </button>
+    </div>
+
+    <div class="menu-cta">
+      <button class="btn btn-primary" style="width:100%;" onclick="showPage('shop')">Shop Now</button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ============ HOME PAGE ============ -->
+<div class="page active" id="page-home">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow-tag"><span class="dot"></span> The digital farmers market for your city</span>
+        <h1>Discover great food, starting in your city.</h1>
+        <p class="hero-sub">The Source connects you with healthy food businesses near you — and lets you shop emerging national brands alongside your neighborhood baker, all in one place.</p>
+        <div class="hero-location">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="color:var(--forest);opacity:0.8;flex-shrink:0;"><path d="M12 21s-7-4.9-9.3-9.4C1.3 8.4 3 5 6.6 4.4c2-.3 3.8.7 5.4 2.6 1.6-1.9 3.4-2.9 5.4-2.6 3.6.6 5.3 4 3.9 7.2C19 16.1 12 21 12 21Z" stroke="currentColor" stroke-width="1.7"/></svg>
+          <input type="text" placeholder="Enter your city or ZIP code">
+          <button class="btn btn-primary" onclick="showPage('local')">Find Food Near Me</button>
+        </div>
+        <div class="hero-actions">
+          <button class="btn btn-secondary" onclick="showPage('shop')">Shop Nationally</button>
+        </div>
+      </div>
+      <div class="hero-art">
+        <svg viewBox="0 0 520 460" fill="none">
+          <rect x="0" y="40" width="520" height="380" rx="28" fill="var(--pale-sage)"/>
+          <ellipse cx="260" cy="230" rx="150" ry="150" fill="var(--soft-sage)" opacity="0.55"/>
+          <g transform="translate(150,150)">
+            <ellipse cx="60" cy="95" rx="95" ry="55" fill="#E4C48F"/>
+            <path d="M-25 60 Q60 10 145 60" stroke="#B98A4F" stroke-width="3" fill="none" opacity="0.7"/>
+            <path d="M-20 78 Q60 30 140 78" stroke="#B98A4F" stroke-width="3" fill="none" opacity="0.6"/>
+            <path d="M10 45 Q60 20 110 45" stroke="#C79A5E" stroke-width="4" fill="none" opacity="0.8"/>
+          </g>
+          <g transform="translate(330,90)">
+            <rect x="0" y="30" width="80" height="100" rx="16" fill="#FFFDF7"/>
+            <rect x="10" y="10" width="60" height="26" rx="8" fill="var(--forest)"/>
+            <rect x="0" y="30" width="80" height="100" rx="16" fill="none" stroke="#D8D2BC" stroke-width="2"/>
+            <circle cx="40" cy="85" r="26" fill="#C79A5E" opacity="0.85"/>
+          </g>
+          <g transform="translate(70,260)">
+            <path d="M20 10h30v20l8 8v90a8 8 0 0 1-8 8H20a8 8 0 0 1-8-8V38l8-8V10Z" fill="#FFFDF7" stroke="#D8D2BC" stroke-width="2"/>
+            <rect x="14" y="60" width="42" height="55" rx="6" fill="var(--forest)" opacity="0.9"/>
+            <rect x="18" y="4" width="22" height="10" rx="3" fill="var(--forest-dark)"/>
+          </g>
+          <g transform="translate(300,270)">
+            <ellipse cx="60" cy="70" rx="80" ry="34" fill="#FFFDF7" stroke="#D8D2BC" stroke-width="2"/>
+            <path d="M-20 60a80 26 0 0 0 160 0" fill="#EFE9D8"/>
+            <circle cx="30" cy="52" r="5" fill="#C79A5E"/>
+            <circle cx="55" cy="46" r="4" fill="#B98A4F"/>
+            <circle cx="80" cy="55" r="5" fill="#D8AE73"/>
+            <circle cx="65" cy="60" r="4" fill="#C79A5E"/>
+            <circle cx="42" cy="62" r="3.5" fill="#B98A4F"/>
+          </g>
+        </svg>
+        <div class="floating-card fc1">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color:var(--forest)"><path d="M12 21s-7-4.9-9.3-9.4C1.3 8.4 3 5 6.6 4.4c2-.3 3.8.7 5.4 2.6 1.6-1.9 3.4-2.9 5.4-2.6 3.6.6 5.3 4 3.9 7.2C19 16.1 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
+          Live in 12 cities
+        </div>
+        <div class="floating-card fc2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color:var(--forest)"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Pickup &amp; local delivery
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pillars">
+    <div class="wrap">
+      <div class="section-head" style="margin-bottom:36px;">
+        <h2>What makes The Source different</h2>
+      </div>
+      <div class="pillars-grid">
+        <div class="pillar-item">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.9-9.3-9.4C1.3 8.4 3 5 6.6 4.4c2-.3 3.8.7 5.4 2.6 1.6-1.9 3.4-2.9 5.4-2.6 3.6.6 5.3 4 3.9 7.2C19 16.1 12 21 12 21Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10.5" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <h3>Hyperlocal Discovery</h3>
+          <p>Enter your location and find healthy food businesses near you — bakers, roasters, and makers you didn't know were around the corner.</p>
+        </div>
+        <div class="pillar-item">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="6" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="18" height="6" rx="2" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <h3>Local + National, Together</h3>
+          <p>Shop an emerging packaged snack brand alongside a neighborhood sourdough baker or farmers-market vendor, in the same cart.</p>
+        </div>
+        <div class="pillar-item">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7h11v10H3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 10h4l3 3v4h-7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7" cy="19" r="1.6" stroke="currentColor" stroke-width="1.5"/><circle cx="17.5" cy="19" r="1.6" stroke="currentColor" stroke-width="1.5"/></svg></div>
+          <h3>Pickup &amp; Local Delivery</h3>
+          <p>Not everything needs to ship across the country. Order for pickup or local delivery straight from businesses near you.</p>
+        </div>
+        <div class="pillar-item">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="9" r="3" stroke="currentColor" stroke-width="1.6"/><circle cx="17" cy="9" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M2 20c0-3 2.5-5 5.5-5S13 17 13 20M11 20c0-3 2.5-5 5.5-5S22 17 22 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <h3>A City-Based Community</h3>
+          <p>The Source is becoming a digital farmers market for your city — connecting you to makers, markets, pop-ups, and local food businesses.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ SHOP PAGE (categories + trending products) ============ -->
+<div class="page" id="page-shop">
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow-tag"><span class="dot"></span> Shop</span>
+      <h1>Everything, curated in one place.</h1>
+      <p>Browse by category or see what's trending across The Source right now.</p>
+    </div>
+  </section>
+
+  <section style="padding:8px 0 0;">
+    <div class="wrap">
+      <div class="search-field">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="color:var(--ink-soft);"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <input type="text" placeholder="Search products, brands, makers...">
+      </div>
+    </div>
+  </section>
+
+  <section id="categories-block">
+    <div class="wrap">
+      <div class="section-head"><h2>Shop by Category</h2></div>
+      <div class="cat-grid">
+        <button class="cat-card">
+          <div class="cat-art"><svg viewBox="0 0 80 80" fill="none"><rect x="20" y="18" width="40" height="52" rx="6" fill="var(--forest)"/><rect x="28" y="10" width="24" height="12" rx="4" fill="var(--forest-dark)"/><path d="M30 40h20M30 48h20M30 56h14" stroke="var(--cream)" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+          <span>Protein &amp; Fitness</span>
+        </button>
+        <button class="cat-card">
+          <div class="cat-art"><svg viewBox="0 0 80 80" fill="none"><ellipse cx="40" cy="52" rx="30" ry="14" fill="#fff"/><path d="M12 46a28 12 0 0 0 56 0" fill="#EFE9D8"/><circle cx="30" cy="40" r="4" fill="#C79A5E"/><circle cx="46" cy="36" r="3.5" fill="#B98A4F"/><circle cx="55" cy="44" r="4" fill="#D8AE73"/></svg></div>
+          <span>Snacks</span>
+        </button>
+        <button class="cat-card">
+          <div class="cat-art"><svg viewBox="0 0 80 80" fill="none"><ellipse cx="40" cy="48" rx="30" ry="20" fill="#E4C48F"/><path d="M14 34 Q40 12 66 34" stroke="#B98A4F" stroke-width="2.5" fill="none" opacity="0.7"/><path d="M18 44 Q40 22 62 44" stroke="#C79A5E" stroke-width="3" fill="none" opacity="0.8"/></svg></div>
+          <span>Bakery &amp; Sourdough</span>
+        </button>
+        <button class="cat-card">
+          <div class="cat-art"><svg viewBox="0 0 80 80" fill="none"><path d="M30 16h20v16l10 10v28a6 6 0 0 1-6 6H26a6 6 0 0 1-6-6V42l10-10V16Z" fill="#fff" stroke="#D8D2BC" stroke-width="2"/><rect x="24" y="46" width="32" height="22" rx="4" fill="var(--forest)"/></svg></div>
+          <span>Drinks</span>
+        </button>
+        <button class="cat-card">
+          <div class="cat-art"><svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="42" r="24" fill="#D9A6A0"/><circle cx="32" cy="34" r="5" fill="#fff" opacity="0.4"/><path d="M40 20c4-4 10-4 12 0" stroke="#7BA05B" stroke-width="3" stroke-linecap="round" fill="none"/></svg></div>
+          <span>Healthy Treats</span>
+        </button>
+        <button class="cat-card">
+          <div class="cat-art"><svg viewBox="0 0 80 80" fill="none"><path d="M18 30h44l-4 30a6 6 0 0 1-6 5H28a6 6 0 0 1-6-5l-4-30Z" fill="var(--forest)"/><path d="M28 30l4-12h16l4 12" stroke="var(--forest-dark)" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></div>
+          <span>Local Favorites</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section id="trending-block">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Trending on The Source</h2>
+      </div>
+      <div class="prod-grid" id="shop">
+
+        <div class="prod-card">
+          <div class="prod-img">
+            <span class="prod-badge">Best Seller</span>
+            <button class="prod-fav" aria-label="Favorite" onclick="showPage('favorites')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.9-9.3-9.4C1.3 8.4 3 5 6.6 4.4c2-.3 3.8.7 5.4 2.6 1.6-1.9 3.4-2.9 5.4-2.6 3.6.6 5.3 4 3.9 7.2C19 16.1 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg></button>
+            <svg viewBox="0 0 80 80" fill="none"><rect x="16" y="24" width="48" height="30" rx="7" fill="var(--forest)"/><rect x="16" y="24" width="48" height="30" rx="7" fill="none" stroke="var(--forest-dark)" stroke-width="1.5"/><path d="M26 39h28" stroke="var(--cream)" stroke-width="3" stroke-linecap="round"/></svg>
+          </div>
+          <div class="prod-body">
+            <span class="prod-brand">Blue Unicorn</span>
+            <span class="prod-name">Sea Salt Protein Bar</span>
+            <span class="prod-attr">20g Protein</span>
+            <span class="fulfillment-pill" style="margin-top:0;">Ships Nationally</span>
+            <div class="prod-bottom">
+              <span class="prod-price">$3.99</span>
+              <span class="prod-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>4.8</span>
+            </div>
+            <button class="add-cart-btn" onclick="showPage('cart')">Add to Cart</button>
+          </div>
+        </div>
+
+        <div class="prod-card">
+          <div class="prod-img" style="background:var(--tag-bg);">
+            <span class="prod-badge">New</span>
+            <button class="prod-fav" aria-label="Favorite" onclick="showPage('favorites')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.9-9.3-9.4C1.3 8.4 3 5 6.6 4.4c2-.3 3.8.7 5.4 2.6 1.6-1.9 3.4-2.9 5.4-2.6 3.6.6 5.3 4 3.9 7.2C19 16.1 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg></button>
+            <svg viewBox="0 0 80 80" fill="none"><ellipse cx="40" cy="52" rx="26" ry="15" fill="#E4C48F"/><path d="M16 38 Q40 16 64 38" stroke="#B98A4F" stroke-width="2.5" fill="none" opacity="0.7"/><path d="M20 48 Q40 26 60 48" stroke="#C79A5E" stroke-width="3" fill="none" opacity="0.8"/></svg>
+          </div>
+          <div class="prod-body">
+            <span class="prod-brand">Sunday Bakehouse</span>
+            <span class="prod-name">Organic Sourdough Loaf</span>
+            <span class="prod-attr">Naturally Fermented</span>
+            <span class="fulfillment-pill" style="margin-top:0;">Pickup &amp; Local Delivery</span>
+            <div class="prod-bottom">
+              <span class="prod-price">$11.00</span>
+              <span class="prod-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>4.9</span>
+            </div>
+            <button class="add-cart-btn" onclick="showPage('cart')">Add to Cart</button>
+          </div>
+        </div>
+
+        <div class="prod-card">
+          <div class="prod-img">
+            <span class="prod-badge">Small Batch</span>
+            <button class="prod-fav" aria-label="Favorite" onclick="showPage('favorites')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.9-9.3-9.4C1.3 8.4 3 5 6.6 4.4c2-.3 3.8.7 5.4 2.6 1.6-1.9 3.4-2.9 5.4-2.6 3.6.6 5.3 4 3.9 7.2C19 16.1 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg></button>
+            <svg viewBox="0 0 80 80" fill="none"><rect x="24" y="26" width="32" height="38" rx="14" fill="#FFFDF7" stroke="#D8D2BC" stroke-width="2"/><rect x="30" y="16" width="20" height="12" rx="5" fill="var(--forest)"/><circle cx="40" cy="46" r="12" fill="#C79A5E" opacity="0.85"/></svg>
+          </div>
+          <div class="prod-body">
+            <span class="prod-brand">Golden Spoon</span>
+            <span class="prod-name">Almond Butter Granola</span>
+            <span class="prod-attr">No Refined Sugar</span>
+            <span class="fulfillment-pill" style="margin-top:0;">Ships Nationally</span>
+            <div class="prod-bottom">
+              <span class="prod-price">$9.99</span>
+              <span class="prod-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>4.7</span>
+            </div>
+            <button class="add-cart-btn" onclick="showPage('cart')">Add to Cart</button>
+          </div>
+        </div>
+
+        <div class="prod-card">
+          <div class="prod-img" style="background:var(--tag-bg);">
+            <span class="prod-badge">Local</span>
+            <button class="prod-fav" aria-label="Favorite" onclick="showPage('favorites')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.9-9.3-9.4C1.3 8.4 3 5 6.6 4.4c2-.3 3.8.7 5.4 2.6 1.6-1.9 3.4-2.9 5.4-2.6 3.6.6 5.3 4 3.9 7.2C19 16.1 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg></button>
+            <svg viewBox="0 0 80 80" fill="none"><circle cx="30" cy="42" r="12" fill="#D9A6A0"/><circle cx="46" cy="38" r="10" fill="#C79A5E"/><circle cx="42" cy="52" r="9" fill="#B98A4F"/></svg>
+          </div>
+          <div class="prod-body">
+            <span class="prod-brand">Rooted Kitchen</span>
+            <span class="prod-name">Cinnamon Date Bites</span>
+            <span class="prod-attr">5 Ingredients</span>
+            <span class="fulfillment-pill" style="margin-top:0;">Pickup &amp; Local Delivery</span>
+            <div class="prod-bottom">
+              <span class="prod-price">$7.50</span>
+              <span class="prod-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>4.6</span>
+            </div>
+            <button class="add-cart-btn" onclick="showPage('cart')">Add to Cart</button>
+          </div>
+        </div>
+
+        <div class="prod-card">
+          <div class="prod-img">
+            <span class="prod-badge">New</span>
+            <button class="prod-fav" aria-label="Favorite" onclick="showPage('favorites')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.9-9.3-9.4C1.3 8.4 3 5 6.6 4.4c2-.3 3.8.7 5.4 2.6 1.6-1.9 3.4-2.9 5.4-2.6 3.6.6 5.3 4 3.9 7.2C19 16.1 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg></button>
+            <svg viewBox="0 0 80 80" fill="none"><path d="M32 16h16v14l8 8v26a5 5 0 0 1-5 5H29a5 5 0 0 1-5-5V38l8-8V16Z" fill="#FFFDF7" stroke="#D8D2BC" stroke-width="2"/><rect x="27" y="42" width="26" height="20" rx="5" fill="var(--forest)" opacity="0.9"/></svg>
+          </div>
+          <div class="prod-body">
+            <span class="prod-brand">Sol Juice Co.</span>
+            <span class="prod-name">Ginger Lemon Wellness Shot</span>
+            <span class="prod-attr">No Added Sugar</span>
+            <span class="fulfillment-pill" style="margin-top:0;">Ships Nationally</span>
+            <div class="prod-bottom">
+              <span class="prod-price">$4.50</span>
+              <span class="prod-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>4.9</span>
+            </div>
+            <button class="add-cart-btn" onclick="showPage('cart')">Add to Cart</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ OUR STANDARDS PAGE ============ -->
+<div class="page" id="page-standards">
+  <section class="standards">
+    <div class="wrap">
+      <div class="standards-top">
+        <span class="eyebrow-tag"><span class="dot"></span> Our Standards</span>
+        <h2>Better food should be easier to find.</h2>
+        <p>Products on The Source are selected with ingredient quality, transparency, and overall product standards in mind.</p>
+      </div>
+      <div class="standards-grid">
+        <div class="standard-item">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v6M12 3c-3 2-5 5-5 9a5 5 0 0 0 10 0c0-4-2-7-5-9Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          <h3>Simple Ingredients</h3>
+          <p>High-quality, recognizable ingredients.</p>
+        </div>
+        <div class="standard-item">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.9-9.3-9.4C1.3 8.4 3 5 6.6 4.4c2-.3 3.8.7 5.4 2.6 1.6-1.9 3.4-2.9 5.4-2.6 3.6.6 5.3 4 3.9 7.2C19 16.1 12 21 12 21Z" stroke="currentColor" stroke-width="1.6"/><path d="M12 12v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <h3>Organic Ingredients</h3>
+          <p>Certified organic and responsibly grown, where available.</p>
+        </div>
+        <div class="standard-item">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <h3>Transparent Labels</h3>
+          <p>Clear ingredient and nutrition information.</p>
+        </div>
+        <div class="standard-item">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M9 3h6l1 4-3 3v7a1 1 0 0 1-2 0v-7L8 7l1-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          <h3>Thoughtful Formulas</h3>
+          <p>Products without unnecessary additives.</p>
+        </div>
+        <div class="standard-item">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.6 5.8L21 9l-4.5 4.4L17.6 20 12 16.8 6.4 20l1.1-6.6L3 9l6.4-1.2L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          <h3>Quality First</h3>
+          <p>Products selected for quality, sourcing, and craftsmanship.</p>
+        </div>
+        <div class="standard-item">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15c0-6 4-11 8-11s8 5 8 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 15h18M6 15v3a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          <h3>Sustainably Sourced</h3>
+          <p>Thoughtful sourcing and packaging practices.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ LOCAL PAGE (discovery + makers) ============ -->
+<div class="page" id="page-local">
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow-tag"><span class="dot"></span> Local</span>
+      <h1>Your city's digital farmers market.</h1>
+      <p>Enter your location to find healthy food businesses near you — with pickup and local delivery from the makers, bakers, and vendors right around the corner.</p>
+    </div>
+  </section>
+  <section style="padding-top:24px;">
+    <div class="wrap">
+      <div class="local-banner">
+        <div class="local-search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="color:var(--cream);opacity:0.8;flex-shrink:0;"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <input type="text" placeholder="Enter your city or ZIP code">
+          <button>Search</button>
+        </div>
+        <div class="local-chip-row">
+          <div class="local-chip">
+            <span class="dot-icon"><svg viewBox="0 0 24 24" fill="none" style="color:var(--cream)"><ellipse cx="12" cy="15" rx="9" ry="4.5" fill="currentColor" opacity="0.9"/></svg></span>
+            Sunday Bakehouse — Miami, FL
+          </div>
+          <div class="local-chip">
+            <span class="dot-icon"><svg viewBox="0 0 24 24" fill="none" style="color:var(--cream)"><circle cx="9" cy="12" r="4" fill="currentColor" opacity="0.9"/><circle cx="15" cy="12" r="3" fill="currentColor" opacity="0.6"/></svg></span>
+            Mila's Kitchen — Coral Gables, FL
+          </div>
+          <div class="local-chip">
+            <span class="dot-icon"><svg viewBox="0 0 24 24" fill="none" style="color:var(--cream)"><rect x="7" y="9" width="10" height="9" rx="3" fill="currentColor" opacity="0.85"/></svg></span>
+            Coastal Nut Co. — Fort Lauderdale, FL
+          </div>
+        </div>
+      </div>
+
+      <div class="section-head"><h2>Meet the Makers</h2></div>
+      <div class="maker-grid">
+        <div class="maker-card">
+          <div class="maker-img"><svg viewBox="0 0 200 130" fill="none"><ellipse cx="100" cy="90" rx="60" ry="30" fill="#E4C48F"/><path d="M50 70 Q100 40 150 70" stroke="#B98A4F" stroke-width="3" fill="none" opacity="0.7"/></svg></div>
+          <div class="maker-body">
+            <h3>Sunday Bakehouse</h3>
+            <span class="maker-loc">Miami, FL</span>
+            <p class="desc">Small-batch sourdough made with simple ingredients.</p>
+            <span class="fulfillment-pill">Pickup &amp; Local Delivery</span>
+          </div>
+        </div>
+        <div class="maker-card">
+          <div class="maker-img"><svg viewBox="0 0 200 130" fill="none"><ellipse cx="100" cy="95" rx="65" ry="24" fill="#fff"/><circle cx="75" cy="70" r="12" fill="#D9A6A0"/><circle cx="105" cy="65" r="10" fill="#C79A5E"/><circle cx="125" cy="75" r="9" fill="#7BA05B"/></svg></div>
+          <div class="maker-body">
+            <h3>Mila's Kitchen</h3>
+            <span class="maker-loc">Coral Gables, FL</span>
+            <p class="desc">Wholesome snacks inspired by family recipes.</p>
+            <span class="fulfillment-pill">Local Delivery Only</span>
+          </div>
+        </div>
+        <div class="maker-card">
+          <div class="maker-img"><svg viewBox="0 0 200 130" fill="none"><rect x="70" y="40" width="60" height="76" rx="14" fill="#FFFDF7" stroke="#D8D2BC" stroke-width="2"/><rect x="80" y="26" width="40" height="18" rx="6" fill="var(--forest)"/><circle cx="100" cy="78" r="20" fill="#C79A5E" opacity="0.85"/></svg></div>
+          <div class="maker-body">
+            <h3>Coastal Nut Co.</h3>
+            <span class="maker-loc">Fort Lauderdale, FL</span>
+            <p class="desc">Small-batch nut butters made from simple ingredients.</p>
+            <span class="fulfillment-pill">Pickup &amp; Ships Nationally</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-head" style="margin-top:64px;"><h2>Markets &amp; Pop-Ups Near You</h2></div>
+      <div class="event-grid">
+        <div class="event-card">
+          <span class="event-date">SAT · SEP 27</span>
+          <h3>Wynwood Farmers Market</h3>
+          <span class="maker-loc">Wynwood, Miami · 9am–1pm</span>
+          <p class="desc">Weekly market featuring 20+ local vendors, including several Source makers.</p>
+        </div>
+        <div class="event-card">
+          <span class="event-date">SUN · OCT 5</span>
+          <h3>Coral Gables Pop-Up Tasting</h3>
+          <span class="maker-loc">Giralda Plaza · 11am–3pm</span>
+          <p class="desc">Sample new products before they launch on The Source, straight from the makers.</p>
+        </div>
+        <div class="event-card event-card-cta">
+          <h3>More cities coming soon.</h3>
+          <p class="desc">The Source is expanding city by city — join the waitlist to bring it to yours.</p>
+          <button class="btn btn-secondary" style="margin-top:14px;">Join the Waitlist</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ ABOUT PAGE ============ -->
+<div class="page" id="page-about">
+  <section>
+    <div class="wrap about-inner">
+      <span class="eyebrow-tag"><span class="dot"></span> About</span>
+      <p class="lead">Some of the best food products never make it onto the shelves of major grocery stores. The Source brings together emerging brands, local makers, and independent food businesses so consumers can discover better products in one place.</p>
+      <div class="mission">
+        <span class="mission-label">OUR MISSION</span>
+        <p>Make high-quality food easier to discover and small food businesses easier to support.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ SELL ON THE SOURCE PAGE ============ -->
+<div class="page" id="page-sell">
+  <section>
+    <div class="wrap sellers">
+      <div>
+        <span class="eyebrow-tag"><span class="dot"></span> For Small Businesses</span>
+        <h2>Built for small food brands, too.</h2>
+        <p class="sub">The Source gives emerging brands and local makers another way to reach customers, build awareness, and grow beyond their local market.</p>
+        <div class="benefit-list">
+          <div class="benefit-row">
+            <span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M4 10l8-6 8 6v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+            Reach new customers
+          </div>
+          <div class="benefit-row">
+            <span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.6 5.8L21 9l-4.5 4.4L17.6 20 12 16.8 6.4 20l1.1-6.6L3 9l6.4-1.2L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+            Build brand awareness
+          </div>
+          <div class="benefit-row">
+            <span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h13M12 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            Sell beyond your local community
+          </div>
+        </div>
+        <div style="margin-top:32px;">
+          <a href="#" class="btn btn-primary">Sell on The Source</a>
+        </div>
+      </div>
+      <div class="sellers-art">
+        <svg viewBox="0 0 400 320" fill="none">
+          <rect x="30" y="40" width="150" height="110" rx="14" fill="#fff"/>
+          <rect x="46" y="56" width="60" height="60" rx="10" fill="var(--soft-sage)"/>
+          <path d="M56 96l14-16 12 12 10-10 14 16" stroke="var(--forest)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="120" y="66" width="45" height="8" rx="4" fill="var(--tag-bg)"/>
+          <rect x="120" y="82" width="35" height="8" rx="4" fill="var(--tag-bg)"/>
+          <rect x="220" y="90" width="150" height="110" rx="14" fill="#fff"/>
+          <circle cx="260" cy="145" r="26" fill="#D8AE73" opacity="0.85"/>
+          <rect x="300" y="120" width="50" height="8" rx="4" fill="var(--tag-bg)"/>
+          <rect x="300" y="136" width="40" height="8" rx="4" fill="var(--tag-bg)"/>
+          <rect x="300" y="152" width="45" height="8" rx="4" fill="var(--tag-bg)"/>
+          <path d="M120 210 Q200 240 280 210" stroke="var(--forest)" stroke-width="2" fill="none" stroke-dasharray="3 6" opacity="0.6"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ SEARCH PAGE ============ -->
+<div class="page" id="page-search">
+  <section class="simple-page">
+    <div class="wrap">
+      <h1>Search The Source</h1>
+      <p>Find products, brands, and local makers.</p>
+      <div class="search-field">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="color:var(--ink-soft);"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <input type="text" placeholder="Search products, brands, makers..." autofocus>
+      </div>
+      <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px;">Popular searches</p>
+      <div class="search-suggest">
+        <button class="search-chip" onclick="showPage('shop','trending-block')">Protein bars</button>
+        <button class="search-chip" onclick="showPage('shop','trending-block')">Sourdough</button>
+        <button class="search-chip" onclick="showPage('shop','trending-block')">Granola</button>
+        <button class="search-chip" onclick="showPage('local')">Miami makers</button>
+        <button class="search-chip" onclick="showPage('shop','trending-block')">No added sugar</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ ACCOUNT PAGE ============ -->
+<div class="page" id="page-account">
+  <section class="simple-page">
+    <div class="wrap">
+      <h1>Your Account</h1>
+      <p>Sign in to track orders, save makers, and check out faster.</p>
+      <div class="acct-card">
+        <div class="acct-field">
+          <label>Email</label>
+          <input type="email" placeholder="you@email.com">
+        </div>
+        <div class="acct-field">
+          <label>Password</label>
+          <input type="password" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px;">Sign In</button>
+        <p style="text-align:center;margin-top:16px;font-size:13.5px;">New here? <a href="#" style="color:var(--forest);font-weight:600;">Create an account</a></p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ FAVORITES PAGE ============ -->
+<div class="page" id="page-favorites">
+  <section class="simple-page">
+    <div class="wrap">
+      <h1>Favorites</h1>
+      <p>Products and makers you've saved will show up here.</p>
+      <div class="empty-state">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.9-9.3-9.4C1.3 8.4 3 5 6.6 4.4c2-.3 3.8.7 5.4 2.6 1.6-1.9 3.4-2.9 5.4-2.6 3.6.6 5.3 4 3.9 7.2C19 16.1 12 21 12 21Z" stroke="currentColor" stroke-width="1.6"/></svg></div>
+        <h3>No favorites yet</h3>
+        <p>Tap the heart on any product to save it for later.</p>
+        <button class="btn btn-primary" onclick="showPage('shop')">Browse the Shop</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ CART PAGE ============ -->
+<div class="page" id="page-cart">
+  <section class="simple-page">
+    <div class="wrap">
+      <h1>Your Cart</h1>
+      <p>2 items</p>
+
+      <div class="cart-row">
+        <div class="prod-img" style="background:var(--pale-sage);">
+          <svg viewBox="0 0 80 80" fill="none"><rect x="16" y="24" width="48" height="30" rx="7" fill="var(--forest)"/><path d="M26 39h28" stroke="var(--cream)" stroke-width="3" stroke-linecap="round"/></svg>
+        </div>
+        <div class="ci-body">
+          <h4>Sea Salt Protein Bar</h4>
+          <span>Blue Unicorn · Qty 2</span>
+        </div>
+        <span class="ci-price">$7.98</span>
+      </div>
+
+      <div class="cart-row">
+        <div class="prod-img" style="background:var(--tag-bg);">
+          <svg viewBox="0 0 80 80" fill="none"><ellipse cx="40" cy="52" rx="26" ry="15" fill="#E4C48F"/><path d="M16 38 Q40 16 64 38" stroke="#B98A4F" stroke-width="2.5" fill="none" opacity="0.7"/></svg>
+        </div>
+        <div class="ci-body">
+          <h4>Organic Sourdough Loaf</h4>
+          <span>Sunday Bakehouse · Qty 1</span>
+        </div>
+        <span class="ci-price">$11.00</span>
+      </div>
+
+      <div class="cart-summary">
+        <div class="row"><span>Subtotal</span><span>$18.98</span></div>
+        <div class="row"><span>Shipping</span><span>Calculated at checkout</span></div>
+        <div class="row total"><span>Total</span><span>$18.98</span></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:20px;">Checkout</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+</main>
+
+<!-- ============ FOOTER (persistent) ============ -->
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <button class="logo" onclick="showPage('home')">
+          <svg class="logo-mark" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M16 24c4.5-3.2 6-7 6-10.5C22 9 19.5 6.5 16 5c-3.5 1.5-6 4-6 8.5 0 3.5 1.5 7.3 6 10.5Z" fill="currentColor" opacity="0.9"/>
+          </svg>
+          The Source
+        </button>
+        <p>Discover your next favorite food brand.</p>
+        <form class="footer-signup" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Subscribed';">
+          <input type="email" placeholder="Enter your email" required>
+          <button type="submit">Sign up</button>
+        </form>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><button onclick="showPage('shop','trending-block')">Trending</button></li>
+          <li><button onclick="showPage('local')">Local</button></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><button onclick="showPage('about')">About</button></li>
+          <li><button onclick="showPage('standards')">Our Standards</button></li>
+          <li><button onclick="showPage('sell')">Sell on The Source</button></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Follow</h4>
+        <ul>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">TikTok</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 The Source. All rights reserved.</span>
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+        <a href="#" aria-label="TikTok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 3v10.5a3.5 3.5 0 1 1-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M15 3c.5 2.5 2.3 4 5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function openMenu(){ document.getElementById('menu').classList.add('open'); document.body.style.overflow='hidden'; }
+  function closeMenu(){ document.getElementById('menu').classList.remove('open'); document.body.style.overflow=''; }
+
+  function showPage(id, scrollToId){
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    var target = document.getElementById('page-' + id);
+    if(target){ target.classList.add('active'); }
+    closeMenu();
+    window.scrollTo({top:0, behavior:'instant'});
+    if(scrollToId){
+      setTimeout(function(){
+        var el = document.getElementById(scrollToId);
+        if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); }
+      }, 60);
+    }
+  }
+</script>
+
+</body>
+</html>
